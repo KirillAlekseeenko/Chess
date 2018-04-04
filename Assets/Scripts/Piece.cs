@@ -18,6 +18,8 @@ public class Piece : MonoBehaviour
         get { return _player; }
     }
 
+    public Vector2Int InitialPosition { get; set; }
+
     public Sprite pieceImage = null;
     public Vector2 position;
     private Vector3 moveTo;

@@ -50,6 +50,7 @@ public static class RobotOperations {
 
 	public static string Remove (Vector2Int placeFrom, Vector2Int placeTo)
 	{
+        Debug.Log("REMOVE: " + reformat(placeFrom).ToString() + " to " + reformat(placeTo).ToString());
 		return "CHECK,6\r\nM,M,M,M,M,M\r\n" + "1" + "," + reformat(placeFrom).ToString() + "," + "2" + "," + reformat(placeTo).ToString() + "," + "0" + "," + "0";
 	}
 	 

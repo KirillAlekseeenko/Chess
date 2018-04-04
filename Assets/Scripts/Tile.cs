@@ -11,7 +11,6 @@ public class Tile
     }
 
 	public Vector2Int BoardPosition { get; private set; }
-	public Vector2Int InitialBoardPosition { get; private set; }
 
     private Piece _currentPiece = null;
     public Piece CurrentPiece
@@ -27,11 +26,12 @@ public class Tile
 
         BoardPosition = new Vector2Int(x, y);
 
+
         if (y == 0 || y == 1 || y == 6 || y == 7)
         {
             _currentPiece = GameObject.Find(x.ToString() + " " + y.ToString()).GetComponent<Piece>();
-            InitialBoardPosition = RobotOperations.getInitialBoardPosition(BoardPosition);
-            NetworkManager.Instance.AddMessage(RobotOperations.StartMove(InitialBoardPosition, BoardPosition));
+            _currentPiece.InitialPosition = RobotOperations.getInitialBoardPosition(BoardPosition);
+            NetworkManager.Instance.AddMessage(RobotOperations.StartMove(_currentPiece.InitialPosition, BoardPosition));
         }
     }
 

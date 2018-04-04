@@ -23,7 +23,9 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log(@"WINNER!");
             //UnityEditor.EditorApplication.isPlaying = false;
+            Clean();
             Application.Quit();
+
         }
         if (!playerTurn && timer < 3)
         {
@@ -83,7 +85,7 @@ public class GameManager : MonoBehaviour
         {
             if (secondTile.CurrentPiece.Type == Piece.pieceType.KING)
                 _kingDead = true;
-            NetworkManager.Instance.AddMessage(RobotOperations.Remove(secondTile.BoardPosition, secondTile.InitialBoardPosition));  
+            NetworkManager.Instance.AddMessage(RobotOperations.Remove(secondTile.BoardPosition, secondTile.CurrentPiece.InitialPosition));  
             Destroy(secondTile.CurrentPiece.gameObject);
         }
 
@@ -96,5 +98,25 @@ public class GameManager : MonoBehaviour
         secondTile.CurrentPiece.HasMoved = true;
 
         playerTurn = !playerTurn;
+    }
+
+    public void Clean()
+    {
+        var board = GameObject.Find("Board");
+        var blackPieces = board.transform.Find("BlackPieces");
+        var whitePieces = board.transform.Find("WhitePieces");
+        foreach(Transform piece in blackPieces.transform)
+        {
+            int x = (int)piece.GetComponent<Piece>().position.x;
+            int y = (int)piece.GetComponent<Piece>().position.y;
+            RobotOperations.Remove(new Vector2Int(x,y), piece.GetComponent<Piece>().InitialPosition); 
+        }
+
+        foreach (Transform piece in whitePieces.transform)
+        {
+            int x = (int)piece.GetComponent<Piece>().position.x;
+            int y = (int)piece.GetComponent<Piece>().position.y;
+            RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition);
+        }
     }
 }
