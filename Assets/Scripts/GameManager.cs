@@ -7,8 +7,12 @@ public class GameManager : MonoBehaviour
     private bool _kingDead = false;
     float timer = 0;
     Board _board;
+
+    ClockController clock;
+
 	void Start ()
     {
+        clock = GetComponentInChildren<ClockController>();
         _board = Board.Instance;
         _board.SetupBoard();
 	}
@@ -17,7 +21,7 @@ public class GameManager : MonoBehaviour
     {
         if (_kingDead)
         {
-            Debug.Log("WINNER!");
+            Debug.Log(@"WINNER!");
             //UnityEditor.EditorApplication.isPlaying = false;
             Application.Quit();
         }
@@ -29,6 +33,7 @@ public class GameManager : MonoBehaviour
         {
             Move move = ab.GetMove();
             _DoAIMove(move);
+            ResumeClock();
             timer = 0;
         }
 	}
@@ -51,6 +56,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void StopClock()
+    {
+        clock.Stopped = true;
+    }
+
+    public void ResumeClock()
+    {
+        clock.Stopped = false;
+    }
+
     public void SwapPieces(Move move)
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Highlight");
@@ -68,8 +83,11 @@ public class GameManager : MonoBehaviour
         {
             if (secondTile.CurrentPiece.Type == Piece.pieceType.KING)
                 _kingDead = true;
+            NetworkManager.Instance.AddMessage(RobotOperations.Remove(secondTile.BoardPosition, secondTile.InitialBoardPosition));  
             Destroy(secondTile.CurrentPiece.gameObject);
         }
+
+        NetworkManager.Instance.AddMessage(RobotOperations.Move(firstTile.BoardPosition, secondTile.BoardPosition));
             
 
         secondTile.CurrentPiece = move.pieceMoved;

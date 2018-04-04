@@ -16,6 +16,7 @@ public class Container : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && move != null)
         {
             manager.SwapPieces(move);
+            manager.StopClock();
         }
     }
 }
