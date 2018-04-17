@@ -3,6 +3,8 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    const float MoveTime = 5.0f;
+
     AlphaBeta ab = new AlphaBeta();
     private bool _kingDead = false;
     float timer = 0;
@@ -10,8 +12,11 @@ public class GameManager : MonoBehaviour
 
     ClockController clock;
 
+    public bool BlockInput { get; set; }
+
 	void Start ()
     {
+        BlockInput = false;
         clock = GetComponentInChildren<ClockController>();
         _board = Board.Instance;
         _board.SetupBoard();
@@ -35,7 +40,7 @@ public class GameManager : MonoBehaviour
         {
             Move move = ab.GetMove();
             _DoAIMove(move);
-            ResumeClock();
+            StartCoroutine(ResumeClock());
             timer = 0;
         }
 	}
@@ -60,11 +65,15 @@ public class GameManager : MonoBehaviour
 
     public void StopClock()
     {
+        //yield return new WaitForSeconds(MoveTime);
         clock.Stopped = true;
     }
 
-    public void ResumeClock()
+    public IEnumerator ResumeClock()
     {
+        BlockInput = true;
+        yield return new WaitForSeconds(MoveTime);
+        BlockInput = false;
         clock.Stopped = false;
     }
 

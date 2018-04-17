@@ -15,7 +15,7 @@ public class ClockController : MonoBehaviour {
 	private void Awake()
 	{
         time = new DateTime(1, 1, 1, 1, 20, 0);
-        Stopped = false;
+        Stopped = true;
 	}
 
 	private void Update()

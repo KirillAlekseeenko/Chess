@@ -13,7 +13,7 @@ public class Container : MonoBehaviour
 
     void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(0) && move != null)
+        if (!manager.BlockInput && Input.GetMouseButtonDown(0) && move != null)
         {
             manager.SwapPieces(move);
             manager.StopClock();
