@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     const float MoveTime = 5.0f;
+
+    [SerializeField] private Text moveText;
 
     AlphaBeta ab = new AlphaBeta();
     private bool _kingDead = false;
@@ -67,6 +70,7 @@ public class GameManager : MonoBehaviour
     {
         //yield return new WaitForSeconds(MoveTime);
         clock.Stopped = true;
+        moveText.text = "AI move";
     }
 
     public IEnumerator ResumeClock()
@@ -74,6 +78,7 @@ public class GameManager : MonoBehaviour
         BlockInput = true;
         yield return new WaitForSeconds(MoveTime);
         BlockInput = false;
+        moveText.text = "Player move";
         clock.Stopped = false;
     }
 
