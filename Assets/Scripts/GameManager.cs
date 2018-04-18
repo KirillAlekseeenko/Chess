@@ -118,14 +118,16 @@ public class GameManager : MonoBehaviour
         {
             int x = (int)piece.GetComponent<Piece>().position.x;
             int y = (int)piece.GetComponent<Piece>().position.y;
-            RobotOperations.Remove(new Vector2Int(x,y), piece.GetComponent<Piece>().InitialPosition); 
+            NetworkManager.Instance.AddMessage(RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition));
+             
         }
 
         foreach (Transform piece in whitePieces.transform)
         {
             int x = (int)piece.GetComponent<Piece>().position.x;
             int y = (int)piece.GetComponent<Piece>().position.y;
-            RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition);
+            NetworkManager.Instance.AddMessage(RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition));
+
         }
     }
 }
