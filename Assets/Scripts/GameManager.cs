@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     const float MoveTime = 5.0f;
 
     [SerializeField] private Text moveText;
+    [SerializeField] private Text endGameText;
 
     AlphaBeta ab = new AlphaBeta();
     private bool _kingDead = false;
@@ -58,7 +59,10 @@ public class GameManager : MonoBehaviour
         if (secondPosition.CurrentPiece && secondPosition.CurrentPiece.Type == Piece.pieceType.KING)
         {
             SwapPieces(move);
+            Time.timeScale = 0;
+            endGameText.text = "YOU LOST";
             _kingDead = true;
+            return;
         }
         else
         {
@@ -98,7 +102,12 @@ public class GameManager : MonoBehaviour
         if (secondTile.CurrentPiece != null)
         {
             if (secondTile.CurrentPiece.Type == Piece.pieceType.KING)
+            {
+                Time.timeScale = 0;
+                endGameText.text = "YOU WIN";
                 _kingDead = true;
+                return;
+            }
             NetworkManager.Instance.AddMessage(RobotOperations.Remove(secondTile.BoardPosition, secondTile.CurrentPiece.InitialPosition));  
             Destroy(secondTile.CurrentPiece.gameObject);
         }
