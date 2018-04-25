@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿﻿using System;
+ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -12,9 +13,11 @@ public class GameManager : MonoBehaviour
     AlphaBeta ab = new AlphaBeta();
     private bool _kingDead = false;
     float timer = 0;
+    private float timerAI = 0;
     Board _board;
 
     ClockController clock;
+    ClockController2 clockAI;
 
     public bool BlockInput { get; set; }
 
@@ -22,6 +25,7 @@ public class GameManager : MonoBehaviour
     {
         BlockInput = false;
         clock = GetComponentInChildren<ClockController>();
+        clockAI = GetComponentInChildren<ClockController2>();
         _board = Board.Instance;
         _board.SetupBoard();
 	}
@@ -39,9 +43,11 @@ public class GameManager : MonoBehaviour
         if (!playerTurn && timer < 3)
         {
             timer += Time.deltaTime;
+            timerAI = 0;
         }
         else if (!playerTurn && timer >= 3)
         {
+            timerAI += Time.deltaTime;
             Move move = ab.GetMove();
             _DoAIMove(move);
             StartCoroutine(ResumeClock());
@@ -53,6 +59,8 @@ public class GameManager : MonoBehaviour
 
     void _DoAIMove(Move move)
     {
+        Debug.Log("DOING AI MOVE");
+//        StartCoroutine(ResumeAIClock());
         Tile firstPosition = move.firstPosition;
         Tile secondPosition = move.secondPosition;
 
@@ -74,18 +82,33 @@ public class GameManager : MonoBehaviour
     {
         //yield return new WaitForSeconds(MoveTime);
         clock.Stopped = true;
+        if (clockAI != null)
+        {
+            clockAI.Stopped = false;
+        }
+
         moveText.text = "AI move";
+    }
+
+    public IEnumerator ResumeAIClock()
+    {
+//        moveText.text = "AI move";
+        yield return new WaitForSeconds(MoveTime);
+        clockAI.Stopped = false;
     }
 
     public IEnumerator ResumeClock()
     {
+        clockAI.Stopped = true;
         BlockInput = true;
         yield return new WaitForSeconds(MoveTime);
         BlockInput = false;
         moveText.text = "Player move";
         clock.Stopped = false;
     }
-
+    
+    // Проект 01. Шахматы
+    
     public void SwapPieces(Move move)
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("Highlight");
