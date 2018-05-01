@@ -25,7 +25,7 @@ public class Piece : MonoBehaviour
     private Vector3 moveTo;
     private GameManager manager;
 
-    private MoveFactory factory = new MoveFactory(Board.Instance);
+    private MoveFactory factory;
     private List<Move> moves = new List<Move>();
 
     private bool _hasMoved = false;
@@ -76,6 +76,7 @@ public class Piece : MonoBehaviour
     {
         moveTo = this.transform.position;
         manager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
+        factory = new MoveFactory(Board.Instance, manager);
     }
 
     void Update()

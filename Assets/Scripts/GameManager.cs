@@ -1,6 +1,7 @@
 ﻿﻿using System;
  using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -10,22 +11,25 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text moveText;
     [SerializeField] private Text endGameText;
 
+    [SerializeField] private ClockController playerClock;
+    [SerializeField] private ClockController clockAI;
+
     AlphaBeta ab = new AlphaBeta();
     private bool _kingDead = false;
     float timer = 0;
     private float timerAI = 0;
     Board _board;
 
-    ClockController clock;
-    ClockController2 clockAI;
+    private RochadeController rochadeController;
+
+    public RochadeController RochadeController { get { return rochadeController; } }
 
     public bool BlockInput { get; set; }
 
 	void Start ()
     {
+        rochadeController = new RochadeController();
         BlockInput = false;
-        clock = GetComponentInChildren<ClockController>();
-        clockAI = GetComponentInChildren<ClockController2>();
         _board = Board.Instance;
         _board.SetupBoard();
 	}
@@ -59,7 +63,7 @@ public class GameManager : MonoBehaviour
 
     void _DoAIMove(Move move)
     {
-        Debug.Log("DOING AI MOVE");
+        //Debug.Log("DOING AI MOVE");
 //        StartCoroutine(ResumeAIClock());
         Tile firstPosition = move.firstPosition;
         Tile secondPosition = move.secondPosition;
@@ -81,7 +85,7 @@ public class GameManager : MonoBehaviour
     public void StopClock()
     {
         //yield return new WaitForSeconds(MoveTime);
-        clock.Stopped = true;
+        playerClock.Stopped = true;
         if (clockAI != null)
         {
             clockAI.Stopped = false;
@@ -104,7 +108,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(MoveTime);
         BlockInput = false;
         moveText.text = "Player move";
-        clock.Stopped = false;
+        playerClock.Stopped = false;
     }
     
     // Проект 01. Шахматы
@@ -119,6 +123,8 @@ public class GameManager : MonoBehaviour
 
         Tile firstTile = move.firstPosition;
         Tile secondTile = move.secondPosition;
+
+        UpdateRochade(move);
 
         firstTile.CurrentPiece.MovePiece(new Vector3(-move.secondPosition.Position.x, 0, move.secondPosition.Position.y));
 
@@ -143,7 +149,8 @@ public class GameManager : MonoBehaviour
         secondTile.CurrentPiece.position = secondTile.Position;
         secondTile.CurrentPiece.HasMoved = true;
 
-        playerTurn = !playerTurn;
+        if(move.move == null)
+            playerTurn = !playerTurn;
     }
 
     public void Clean()
@@ -156,7 +163,6 @@ public class GameManager : MonoBehaviour
             int x = (int)piece.GetComponent<Piece>().position.x;
             int y = (int)piece.GetComponent<Piece>().position.y;
             NetworkManager.Instance.AddMessage(RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition));
-             
         }
 
         foreach (Transform piece in whitePieces.transform)
@@ -164,7 +170,41 @@ public class GameManager : MonoBehaviour
             int x = (int)piece.GetComponent<Piece>().position.x;
             int y = (int)piece.GetComponent<Piece>().position.y;
             NetworkManager.Instance.AddMessage(RobotOperations.Remove(new Vector2Int(x, y), piece.GetComponent<Piece>().InitialPosition));
+        }
+    }
 
+    private void UpdateRochade(Move move)
+    {
+        if (move.pieceMoved.Player == Piece.playerColor.WHITE)
+        {
+            if (move.pieceMoved.Type == Piece.pieceType.ROOK)
+            {
+                if (move.pieceMoved.InitialPosition.X == 0)
+                {
+                    rochadeController.OnLeftRooksMove();
+                }
+                else
+                {
+                    rochadeController.OnRightRooksMove();
+                }
+            }
+
+            if (move.pieceMoved.Type == Piece.pieceType.KING)
+                rochadeController.OnKingsMove();
+        }
+        else
+        {
+            if (move.pieceKilled != null && move.pieceKilled.Type == Piece.pieceType.ROOK)
+            {
+                if (move.pieceKilled.InitialPosition.X == 0)
+                {
+                    rochadeController.OnLeftRooksMove();
+                }
+                else
+                {
+                    rochadeController.OnRightRooksMove();
+                }
+            }
         }
     }
 }

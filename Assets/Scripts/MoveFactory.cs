@@ -13,7 +13,9 @@ public class MoveFactory
     private Piece.playerColor _player;
     private Vector2 _position;
 
-    public MoveFactory(Board board)
+    GameManager manager;
+
+    public MoveFactory(Board board, GameManager manager = null)
     {
         _board = board;
         pieceToFunction.Add(Piece.pieceType.PAWN, _GetPawnMoves);
@@ -22,6 +24,8 @@ public class MoveFactory
         pieceToFunction.Add(Piece.pieceType.BISHOP, _GetBishopMoves);
         pieceToFunction.Add(Piece.pieceType.QUEEN, _GetQueenMoves);
         pieceToFunction.Add(Piece.pieceType.KING, _GetKingMoves);
+
+        this.manager = manager;
     }
 
     public List<Move> GetMoves(Piece piece, Vector2 position)
@@ -148,8 +152,20 @@ public class MoveFactory
                     continue;
 
                 _CheckAndStoreMove(new Vector2(_position.x + x, _position.y + y));
+
             }
         }
+
+        if (manager == null)
+            return;
+
+        bool left, right;
+        _CheckRochade(_position, out left, out right);
+
+        if (left && manager.RochadeController.Left)
+            _CheckAndStoreMove(new Vector2(_position.x - 2, _position.y), RochadeType.LEFT);
+        if (right && manager.RochadeController.Right)
+            _CheckAndStoreMove(new Vector2(_position.x + 2, _position.y), RochadeType.RIGHT);
     }
 
     void _GetQueenMoves()
@@ -175,20 +191,60 @@ public class MoveFactory
         }
     }
 
-    void _CheckAndStoreMove(Vector2 move)
+    void _CheckAndStoreMove(Vector2 move, RochadeType rochade = RochadeType.NOTHING)
     {
         if (_IsOnBoard(move) && (!_ContainsPiece(_board.GetTileFromBoard(move)) || _IsEnemy(_board.GetTileFromBoard(move))))
         {
+            
             Move m = new Move();
             m.firstPosition = _board.GetTileFromBoard(_position);
             m.pieceMoved = _piece;
             m.secondPosition = _board.GetTileFromBoard(move);
+
+            if(rochade == RochadeType.LEFT)
+            {
+                var firstPos = _board.GetTileFromBoard(new Vector2(0, 7));
+                var leftRook = firstPos.CurrentPiece;
+                m.move = new Move();
+                m.move.pieceMoved = leftRook;
+                m.move.firstPosition = firstPos;
+                m.move.secondPosition = _board.GetTileFromBoard(new Vector2(m.secondPosition.BoardPosition.X + 1, 7));
+            }
+            else if(rochade == RochadeType.RIGHT)
+            {
+                var firstPos = _board.GetTileFromBoard(new Vector2(7, 7));
+                var rightRook = firstPos.CurrentPiece;
+                m.move = new Move();
+                m.move.pieceMoved = rightRook;
+                m.move.firstPosition = firstPos;
+                m.move.secondPosition = _board.GetTileFromBoard(new Vector2(m.secondPosition.BoardPosition.X - 1, 7));
+            }
 
             if (m.secondPosition != null)
                 m.pieceKilled = m.secondPosition.CurrentPiece;
 
             moves.Add(m);
         }
+    }
+
+    void _CheckRochade(Vector2 kingPos, out bool left, out bool right)
+    {
+        left = true;
+        right = true;
+        for (var x = 1; x < 7; x++)
+            if (_ContainsPiece(_board.GetTileFromBoard(new Vector2(x, kingPos.y))))
+            {
+                if (x == (int)kingPos.x)
+                    continue;
+                else if(x < (int)kingPos.x)
+                {
+                    left = false;
+                }
+                else
+                {
+                    right = false;
+                }
+            }
     }
 
     bool _IsEnemy(Tile tile)
@@ -218,3 +274,5 @@ public class MoveFactory
             return false;
     }
 }
+
+enum RochadeType {LEFT, RIGHT, NOTHING}

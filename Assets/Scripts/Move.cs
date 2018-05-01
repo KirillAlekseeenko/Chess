@@ -8,4 +8,7 @@ public class Move
     public Piece pieceMoved = null;
     public Piece pieceKilled = null;
     public int score = -100000000;
+    public Move move;
 }
+
+
